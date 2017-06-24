@@ -1,5 +1,7 @@
 import pygame
 import time
+import random
+
 from box import Box
 
 pygame.init()
@@ -9,16 +11,12 @@ blue = (0, 0, 255)
 white = (230, 240, 240)
 black = (0, 0, 0)
 L1, L2, L3, L4, L5 = 3, 4, 5, 6, 7
-
+images_list = ["1.png", "2.jpg", "3.jpg", "4.jpg"]  # THIS NEEDS WORK !!! Automation required. It's hard typed currently!
 
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Memory Game')
 clock = pygame.time.Clock()
-
-# ---------------
-# question_mark = pygame.image.load("question_mark")
 all_sprites_list = pygame.sprite.Group()
-# ---------------
 
 
 def text_objects(text, font):
@@ -58,10 +56,29 @@ def start_boxes(n):
     # Creating the boxes:
     objects = [all_sprites_list.add(Box()) for i in range(n)]
     halfLen = len(all_sprites_list) / 2
-    # Making the boxes unknown:
+
+    # Giving each box its image/value and making them unknown for the start of the game:
+    past_images = []
     for i in all_sprites_list:
-        i.image = pygame.image.load("question_mark")
-        i.rect = i.image.get_rect()
+        assigning = True
+        while assigning:
+            current_choice = random.choice(images_list)
+            if past_images.count(current_choice) < 2:
+                past_images.append(current_choice)
+                i.img_list = [pygame.image.load("question_mark"), pygame.image.load(current_choice)]
+                i.image = i.img_list[0]
+                i.rect = i.image.get_rect()
+                assigning = False
+
+    # ----------------
+
+    # Making the boxes unknown:
+    # for i in all_sprites_list:
+    #     i.image = pygame.image.load("question_mark")  # i.image =
+    #     i.rect = i.image.get_rect()
+
+    # ----------------
+
     # Positioning the boxes:
     w = display_width / level
     h = display_height / 3
@@ -89,7 +106,8 @@ def refresh():
 
 
 def show():
-    current_sprite.image = pygame.image.load("1.png")
+    # current_sprite.image = pygame.image.load("1.png")  # current_sprite.image = img[]
+    current_sprite.image = current_sprite.img_list[1]
 
 
 def gameloop():
@@ -114,7 +132,7 @@ def gameloop():
                         clicks += 1
                         global current_sprite
                         current_sprite = box
-                        print("YEAH")
+                        print("That's one box")
                         show()
 
         # write game logic here
