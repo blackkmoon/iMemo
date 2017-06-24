@@ -1,6 +1,6 @@
 import pygame
 import time
-from box_test import Box
+from box import Box
 
 pygame.init()
 
@@ -18,7 +18,7 @@ pygame.display.set_caption('Memory Game')
 clock = pygame.time.Clock()
 
 # ---------------
-# question_mark = pygame.image.load("sa")
+# question_mark = pygame.image.load("question_mark")
 all_sprites_list = pygame.sprite.Group()
 # ---------------
 
@@ -62,7 +62,7 @@ def start_boxes(n):
     halfLen = len(all_sprites_list) / 2
     # Making the boxes unknown:
     for i in all_sprites_list:
-        i.image = pygame.image.load("sa")
+        i.image = pygame.image.load("question_mark")
         i.rect = i.image.get_rect()
     # Positioning the boxes:
     w = display_width / level
@@ -87,7 +87,7 @@ def start_boxes(n):
 def refresh():
     time.sleep(0.7)
     for i in all_sprites_list:
-        i.image = pygame.image.load("sa")
+        i.image = pygame.image.load("question_mark")
 
 
 def show():
