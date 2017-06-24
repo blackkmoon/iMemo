@@ -1,16 +1,13 @@
-import pygame
-import time
+import pygame, time
 from box import Box
 
 pygame.init()
 
-display_height = 600
-display_width = 800
+display_height, display_width = 600, 800
 blue = (0, 0, 255)
 white = (230, 240, 240)
 black = (0, 0, 0)
 L1, L2, L3, L4, L5 = 3, 4, 5, 6, 7
-# n = 10
 
 
 gameDisplay = pygame.display.set_mode((display_width, display_height))
@@ -131,7 +128,7 @@ def gameloop():
 
         # display what’s drawn. this might change.
         pygame.display.update()
-        # run at 20 fps
+        # run at 30 fps
         clock.tick(30)
 
     # close the window and quit
