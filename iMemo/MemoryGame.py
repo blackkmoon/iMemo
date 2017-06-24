@@ -1,4 +1,5 @@
-import pygame, time
+import pygame
+import time
 from box import Box
 
 pygame.init()
@@ -34,7 +35,7 @@ def message_display(text, center):
     pygame.display.update()
 
 
-def game_Start():
+def start_screen():
     pressed = True
     while pressed:
         for event in pygame.event.get():
@@ -94,9 +95,9 @@ def show():
 def gameloop():
     global level
     level = L3
-    done = True
     start_boxes((level - 1) * 2)
     clicks = 0
+    done = True
     while done:
         if clicks == 2:
             clicks = 0
@@ -135,4 +136,4 @@ def gameloop():
     pygame.quit()
 
 # gameloop()
-game_Start()
+start_screen()
