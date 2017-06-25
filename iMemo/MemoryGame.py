@@ -1,6 +1,7 @@
 import pygame
 import time
 import random
+import os
 
 from box import Box
 
@@ -11,7 +12,7 @@ blue = (0, 0, 255)
 white = (230, 240, 240)
 black = (0, 0, 0)
 L1, L2, L3, L4, L5 = 3, 4, 5, 6, 7
-images_list = ["1.png", "2.jpg", "3.jpg", "4.jpg"]  # THIS NEEDS WORK !!! Automation required. It's hard typed currently!
+
 
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Memory Game')
@@ -57,17 +58,30 @@ def start_boxes(n):
     objects = [all_sprites_list.add(Box()) for i in range(n)]
     halfLen = len(all_sprites_list) / 2
 
+    #images_list = []
+    #images_list = [random.choice(os.listdir("Images/")) for k in range(level - 1) if k not in locals()]
+
+    # Creating a list of images for the sprites:
+    images_list = []
+    while len(images_list) != (level - 1):
+        rand_img = random.choice(os.listdir("Images/"))
+        if rand_img not in images_list:
+            images_list.append(rand_img)
+
     # Giving each box its image/value and making them unknown for the start of the game:
     past_images = []
-    for i in all_sprites_list:
+    for sprite in all_sprites_list:
         assigning = True
         while assigning:
             current_choice = random.choice(images_list)
             if past_images.count(current_choice) < 2:
                 past_images.append(current_choice)
-                i.img_list = [pygame.image.load("question_mark"), pygame.image.load(current_choice)]
-                i.image = i.img_list[0]
-                i.rect = i.image.get_rect()
+                sprite.img_list = [pygame.image.load("question_mark"), pygame.image.load("Images/" + current_choice)]
+                sprite.image = sprite.img_list[0]
+                sprite.rect = sprite.image.get_rect()
+                # Removing the images which are already used:
+                if past_images.count(current_choice) == 2:
+                    images_list.remove(current_choice)
                 assigning = False
 
     # ----------------
@@ -85,7 +99,7 @@ def start_boxes(n):
     count = 1
     for k in all_sprites_list:
         if count <= halfLen:
-            print(w)
+            # print(w)
             k.rect.centerx = w
             k.rect.centery = h
             w += display_width / level
@@ -100,7 +114,7 @@ def start_boxes(n):
 
 
 def refresh():
-    time.sleep(0.7)
+    time.sleep(0.5)
     for i in all_sprites_list:
         i.image = pygame.image.load("question_mark")
 
@@ -132,7 +146,6 @@ def gameloop():
                         clicks += 1
                         global current_sprite
                         current_sprite = box
-                        print("That's one box")
                         show()
 
         # write game logic here
