@@ -8,18 +8,24 @@ from box import Box, Button
 pygame.init()
 
 display_height, display_width = 600, 800
+# Setting colors:
 blue = (0, 0, 255)
-white = (230, 240, 240)
+white = (255, 255, 255)
 black = (0, 0, 0)
-green = (0,255,0)
-lightgreen = (160,240,20)
+green = (0, 255, 0)
+lightgreen = (160, 240, 20)
+black = (0, 0, 0)
+# Setting level vars:
 L1, L2, L3, L4, L5 = 3, 4, 5, 6, 7
 
 
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Memory Game')
 clock = pygame.time.Clock()
-all_sprites_list = pygame.sprite.Group()
+# Creating the home button:
+home_img = pygame.image.load("home.png")
+home_x = 7
+home_y = 7
 
 
 def text_objects(text, font):
@@ -37,14 +43,13 @@ def message_display(text, center):
 
 
 def start_screen():
-    pressed = True
+
     gameDisplay.fill(white)
 
     # Creating the start button:
-    start_button = Button(gameDisplay, green, 365, 300, 70, 30)
-
-    
-
+    start_button = Button(gameDisplay, green, 335, 290, 130, 35, "Start", black)  # (surface, color, startx, starty, width, height)
+    # Waiting for user input:
+    pressed = True
     while pressed:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -52,29 +57,34 @@ def start_screen():
                 exit()
                 pressed = False
 
-            # Checking if the user starts the game:    
+            # Checking if the user starts the game:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = pygame.mouse.get_pos()
-                if start_button.name.collidepoint(pos):
+                if start_button.rect.collidepoint(pos):
                     pressed = False
                     gameloop()
 
-            
+            # Highlighting the button:
             pos = pygame.mouse.get_pos()
-            start_button.highlight(green, start_button.y,)
+            start_button.highlight(green, start_button.y)
+            if start_button.rect.collidepoint(pos):
+                start_button.draw_text = "no"
+                start_button.highlight(lightgreen, (start_button.y + 7))
+                start_button.highlight_text()
+            start_button.draw_text = "yes"
 
-            if start_button.name.collidepoint(pos):
-                start_button.highlight(lightgreen, (start_button.y + 10))
-
+            # Displaying the home button:
+            gameDisplay.blit(home_img, (home_x, home_y))
             message_display("Welcome to iMemo!", ((display_width / 2), (display_height / 3.5)))
-
 
         pygame.display.update()
         clock.tick(30)
 
 
 def start_boxes(n):
-    # Creating the boxes:
+    # Creating the boxes/sprites:
+    global all_sprites_list
+    all_sprites_list = pygame.sprite.Group()
     objects = [all_sprites_list.add(Box()) for i in range(n)]
     halfLen = len(all_sprites_list) / 2
 
@@ -103,7 +113,6 @@ def start_boxes(n):
                 if past_images.count(current_choice) == 2:
                     images_list.remove(current_choice)
                 assigning = False
-
     # ----------------
 
     # Making the boxes unknown:
@@ -154,7 +163,7 @@ def gameloop():
         if clicks == 2:
             clicks = 0
             refresh()
-        # write event handlers here
+        # Write event handlers here
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = False
@@ -169,6 +178,9 @@ def gameloop():
                         current_sprite = box
                         show()
 
+                    if home_img.get_rect().collidepoint(pos):
+                        start_screen()
+
         # write game logic here
 
         # clear the screen before drawing
@@ -177,7 +189,15 @@ def gameloop():
         # pygame.draw.line(gameDisplay, blue, (display_width / 2, 0), (display_width / 2, display_height), 5)
         # pygame.draw.line(gameDisplay, blue, (0, display_height / 2), (display_width, display_height / 2), 5)
 
-        all_sprites_list.draw(gameDisplay)  # Draw all boxes to the screen.
+        # Draw all boxes to the screen.
+        all_sprites_list.draw(gameDisplay)
+
+        # Highlighting the home button:
+        pos = pygame.mouse.get_pos()
+        home_y = 7
+        if home_img.get_rect().collidepoint(pos):
+            home_y += 3
+        gameDisplay.blit(home_img, (home_x, home_y))
 
         # display what’s drawn. this might change.
         pygame.display.update()
@@ -187,5 +207,4 @@ def gameloop():
     # close the window and quit
     pygame.quit()
 
-# gameloop()
 start_screen()
