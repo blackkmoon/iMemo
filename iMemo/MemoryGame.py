@@ -3,7 +3,7 @@ import time
 import random
 import os
 
-from box import Box
+from box import Box, Button
 
 pygame.init()
 
@@ -11,6 +11,8 @@ display_height, display_width = 600, 800
 blue = (0, 0, 255)
 white = (230, 240, 240)
 black = (0, 0, 0)
+green = (0,255,0)
+lightgreen = (160,240,20)
 L1, L2, L3, L4, L5 = 3, 4, 5, 6, 7
 
 
@@ -36,21 +38,39 @@ def message_display(text, center):
 
 def start_screen():
     pressed = True
+    gameDisplay.fill(white)
+
+    # Creating the start button:
+    start_button = Button(gameDisplay, green, 365, 300, 70, 30)
+
+    
+
     while pressed:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
                 pressed = False
+
+            # Checking if the user starts the game:    
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = pygame.mouse.get_pos()
+                if start_button.name.collidepoint(pos):
+                    pressed = False
+                    gameloop()
 
-        gameDisplay.fill(white)
+            
+            pos = pygame.mouse.get_pos()
+            start_button.highlight(green, start_button.y,)
 
-        message_display("Welcome to iMemo!", ((display_width / 2), (display_height / 3.5)))
+            if start_button.name.collidepoint(pos):
+                start_button.highlight(lightgreen, (start_button.y + 10))
+
+            message_display("Welcome to iMemo!", ((display_width / 2), (display_height / 3.5)))
+
 
         pygame.display.update()
-        time.sleep(2)
-        pressed = False
-        gameloop()
+        clock.tick(30)
 
 
 def start_boxes(n):
@@ -138,6 +158,7 @@ def gameloop():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = False
+                exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = pygame.mouse.get_pos()
                 for box in all_sprites_list:
