@@ -19,6 +19,7 @@ black = (0, 0, 0)
 L1, L2, L3, L4, L5 = 3, 4, 5, 6, 7
 
 
+#REVIEW: I strongly suggest using the same naming style everywhere, either snake_case or camelCase. You probably want to use snake_case, since it's python's standard
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Memory Game')
 clock = pygame.time.Clock()
@@ -35,6 +36,7 @@ def text_objects(text, font):
 
 def message_display(text, center):
     largeText = pygame.font.Font('freesansbold.ttf', 50)
+    #REVIEW: Usually python reserves Capitalised names for classes
     TextSurf, TextRect = text_objects(text, largeText)
     TextRect.center = center
     gameDisplay.blit(TextSurf, TextRect)
@@ -48,6 +50,24 @@ def start_screen():
 
     # Creating the start button:
     start_button = Button(gameDisplay, green, 335, 290, 130, 35, "Start", black)  # (surface, color, startx, starty, width, height)
+    '''
+    #REVIEW:
+
+    # When functions have too many arguments, it might work better to use named arguments:
+    start_button = Button(gameDisplay, color=green, startx=335, starty=290, width=130, height=35, ...)
+
+    # Or even better, keyword arguments:
+    # You can declare this variable somewhere easy to access
+    start_button_config = {
+        'surface': gameDisplay,
+        'color': green,
+        'startx': 335,
+        ...
+    }
+    start_button = Button(**start_button_config)
+
+    # Check this -> https://docs.python.org/2/tutorial/controlflow.html#keyword-arguments
+    '''
     # Waiting for user input:
     pressed = True
     while pressed:
@@ -82,6 +102,22 @@ def start_screen():
 
 
 def start_boxes(n):
+    '''
+    #REVIEW:
+    In this function you are doing four things at the same time:
+    1. Creating a list of sprite objects
+    2. Loading images from disk
+    3. Choosing a random image for each sprite
+    4. Initialising each sprite
+
+    Ideally, you want the initialisation of sprites and the loading of images to be independent from each other, even different functions.
+    I suggest trying to organise this function into the following steps:
+    1. Load the images you are going to use from disk
+    2. Have a single loop that does the following for each sprite:
+        1. Create the sprite object.
+        2. Assign to the sprite the images it needs.
+        3. Position the sprite.
+    '''
     # Creating the boxes/sprites:
     global all_sprites_list
     all_sprites_list = pygame.sprite.Group()
@@ -94,6 +130,19 @@ def start_boxes(n):
     # Creating a list of images for the sprites:
     images_list = []
     while len(images_list) != (level - 1):
+        '''
+        #REVIEW:
+        # This is accessing the filesystem everytime you choose an image, it's not a big deal here, but it would be better to just read the filenames once:
+        all_images = os.listdir('Images/')
+        while len(images_list) != (level - 1):
+            rand_img = random.choice(all_images)
+            ...
+        
+        # A shorter option would be using random.shuffle
+        all_images = os.listdir('Images/')
+        random.shuffle(all_images)
+        images_list = all_images[:level]
+        '''
         rand_img = random.choice(os.listdir("Images/"))
         if rand_img not in images_list:
             images_list.append(rand_img)
@@ -145,7 +194,22 @@ def start_boxes(n):
 def refresh():
     time.sleep(0.5)
     for i in all_sprites_list:
-        i.image = pygame.image.load("question_mark")
+        i.image = pygame.image.load("question_mark") 
+        '''
+        #REVIEW:
+        # I think that pygame.image.load loads the image from the disk every time. You might want to cache all your images when starting the level:
+        image_cache = {
+            'question_mark': pygame.image.load('question_mark'),
+            'sprite_1': pygame.image.load('sprite_1),
+            ...
+        }
+
+        # And then here you can just query the cache:
+        i.image = image_cache['question_mark']
+
+        # Also, the question mark is already in sprite.img_list, so you can do this as well:
+        i.image = i.img_list[0]
+        '''
 
 
 def show():
@@ -175,6 +239,12 @@ def gameloop():
                     if box.rect.collidepoint(pos):
                         clicks += 1
                         global current_sprite
+                        '''
+                        #REVIEW:
+                        Don't declare global variables in your functions, it's error prone and makes your code harder to reason about.
+                        Instead, you want pass the current_sprite to your show() function, that way it doesn't need to be global.
+                        Same about the level var above, instead of making it global, pass it as an argument to the functions that need it.
+                        '''
                         current_sprite = box
                         show()
 
