@@ -18,6 +18,8 @@ black = (0, 0, 0)
 # Setting level vars:
 L1, L2, L3, L4, L5 = 3, 4, 5, 6, 7
 
+level = L3
+
 
 game_display = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Memory Game')
@@ -39,18 +41,18 @@ start_button_config = {
 }
 
 
-def text_objects(text, font):
-    textSurface = font.render(text, True, black)
-    return textSurface, textSurface.get_rect()
+
 
 
 def message_display(text, center):
-    largeText = pygame.font.Font('freesansbold.ttf', 50)
-    TextSurf, TextRect = text_objects(text, largeText)
-    TextRect.center = center
-    game_display.blit(TextSurf, TextRect)
+    text_surface = pygame.font.Font('freesansbold.ttf', 50).render(text, True, black)
+    text_rect = text_surface.get_rect()
+    text_rect.center = center
+    game_display.blit(text_surface, text_rect)
 
     pygame.display.update()
+
+
 
 
 def start_screen():
@@ -58,7 +60,7 @@ def start_screen():
     game_display.fill(white)
 
     # Creating the start button:
-    start_button = Button(**start_button_config)  # (surface, color, startx, starty, width, height)
+    start_button = Button(**start_button_config)
 
     # Waiting for user input:
     pressed = True
@@ -74,7 +76,7 @@ def start_screen():
                 pos = pygame.mouse.get_pos()
                 if start_button.rect.collidepoint(pos):
                     pressed = False
-                    gameloop()
+                    gameloop(level)
 
             # Highlighting the button:
             pos = pygame.mouse.get_pos()
@@ -165,9 +167,9 @@ def show():
     current_sprite.image = current_sprite.img_list[1]
 
 
-def gameloop():
-    global level
-    level = L3
+def gameloop(level):
+    # global level
+    # level = L3
     start_boxes((level - 1) * 2)
     clicks = 0
     done = True
