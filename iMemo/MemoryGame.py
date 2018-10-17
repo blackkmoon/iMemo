@@ -3,31 +3,35 @@ import time
 import random
 import os
 
+from itertools import cycle
 from box import Box, Button
 
 pygame.init()
 
-display_height, display_width = 600, 800
 # Setting colors:
 blue = (0, 0, 255)
 white = (255, 255, 255)
 black = (0, 0, 0)
 green = (0, 255, 0)
 lightgreen = (160, 240, 20)
-black = (0, 0, 0)
+
 # Setting level vars:
 L1, L2, L3, L4, L5 = 3, 4, 5, 6, 7
 
-level = L3
+# Level chosen:
+level = L5
 
-
+display_height, display_width = 600, 800
 game_display = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Memory Game')
 clock = pygame.time.Clock()
+
 # Creating the home button:
 home_img = pygame.image.load("home.png")
 home_x = 7
 home_y = 7
+
+unknown_sprite = pygame.image.load("question_mark")
 
 start_button_config = {
     'surface': game_display,
@@ -41,9 +45,6 @@ start_button_config = {
 }
 
 
-
-
-
 def message_display(text, center):
     text_surface = pygame.font.Font('freesansbold.ttf', 50).render(text, True, black)
     text_rect = text_surface.get_rect()
@@ -51,8 +52,6 @@ def message_display(text, center):
     game_display.blit(text_surface, text_rect)
 
     pygame.display.update()
-
-
 
 
 def start_screen():
@@ -96,53 +95,38 @@ def start_screen():
 
 
 def start_boxes(n):
-    # Creating the boxes/sprites:
-    global all_sprites_list
+
+    # Creating the sprites:
     all_sprites_list = pygame.sprite.Group()
     objects = [all_sprites_list.add(Box()) for i in range(n)]
-    halfLen = len(all_sprites_list) / 2
 
-    #images_list = []
-    #images_list = [random.choice(os.listdir("Images/")) for k in range(level - 1) if k not in locals()]
+    # Loading all images from disk, choosing and randomizing the needed for the level:
+    all_images = os.listdir('Images/')
+    random.shuffle(all_images)
+    all_images = all_images[:level - 1] * 2
+    random.shuffle(all_images)
+    images_list = cycle(all_images)
 
-    # Creating a list of images for the sprites:
-    images_list = []
-    while len(images_list) != (level - 1):
-        rand_img = random.choice(os.listdir("Images/"))
-        if rand_img not in images_list:
-            images_list.append(rand_img)
-
-    # Giving each box its image/value and making them unknown for the start of the game:
-    past_images = []
+    # Configuring the stripes:
     for sprite in all_sprites_list:
-        assigning = True
-        while assigning:
-            current_choice = random.choice(images_list)
-            if past_images.count(current_choice) < 2:
-                past_images.append(current_choice)
-                sprite.img_list = [pygame.image.load("question_mark"), pygame.image.load("Images/" + current_choice)]
-                sprite.image = sprite.img_list[0]
-                sprite.rect = sprite.image.get_rect()
-                # Removing the images which are already used:
-                if past_images.count(current_choice) == 2:
-                    images_list.remove(current_choice)
-                assigning = False
-    # ----------------
 
-    # Making the boxes unknown:
-    # for i in all_sprites_list:
-    #     i.image = pygame.image.load("question_mark")  # i.image =
-    #     i.rect = i.image.get_rect()
+        sprite.id = next(images_list)  # Contains the name of the image as a string: '6.jpg'
+        sprite.cache = {
+            'img': pygame.image.load('Images/' + sprite.id),
+            'unknown': unknown_sprite
 
-    # ----------------
+        }
+        sprite.image = sprite.cache['unknown']
+        sprite.rect = sprite.image.get_rect()
+        sprite.guessed = False
 
     # Positioning the boxes:
+    halfLen = len(all_sprites_list) / 2
     w = display_width / level
     h = display_height / 3
     count = 1
     for k in all_sprites_list:
         if count <= halfLen:
-            # print(w)
             k.rect.centerx = w
             k.rect.centery = h
             w += display_width / level
@@ -154,29 +138,33 @@ def start_boxes(n):
             k.rect.centery = h
             w += display_width / level
         count += 1
+    return all_sprites_list
 
 
-def refresh():
-    time.sleep(0.5)
-    for i in all_sprites_list:
-        i.image = pygame.image.load("question_mark")
+def refresh(all_sprites_list):
 
+    # Before refreshing, pausing to show the 2 selected boxes:
+    # (Using time.time() since time.sleep() causes a bug)
+    # time.sleep(0.5)
+    start = time.time()
+    while time.time() - start < 0.35:
+        pass
 
-def show():
-    # current_sprite.image = pygame.image.load("1.png")  # current_sprite.image = img[]
-    current_sprite.image = current_sprite.img_list[1]
+    for sprite in all_sprites_list:
+        if sprite.guessed == False:
+            sprite.image = sprite.cache['unknown']
 
 
 def gameloop(level):
-    # global level
-    # level = L3
-    start_boxes((level - 1) * 2)
+    all_sprites_list = start_boxes((level - 1) * 2)
     clicks = 0
+    first_check = 0
     done = True
     while done:
         if clicks == 2:
             clicks = 0
-            refresh()
+            first_check = 0
+            refresh(all_sprites_list)
         # Write event handlers here
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -184,18 +172,33 @@ def gameloop(level):
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = pygame.mouse.get_pos()
-                for box in all_sprites_list:
-                    # print(box.rect)
-                    if box.rect.collidepoint(pos):
-                        clicks += 1
-                        global current_sprite
-                        current_sprite = box
-                        show()
+                for sprite in all_sprites_list:
+
+                    if sprite.rect.collidepoint(pos):
+
+                        # Revealing the each selected box:
+                        sprite.image = sprite.cache['img']
+
+                        # Game logic (is there a match or no):
+                        if first_check == 0:
+                            state = sprite.id
+                            state_rect = sprite.rect
+                            first_check += 1
+                            clicks += 1
+                        else:
+                            if sprite.id != state:
+                                clicks += 1
+                            else:
+                                if state_rect != sprite.rect:
+                                    for sprite in all_sprites_list:
+                                        if sprite.id == state:
+                                            sprite.guessed = True
+                                clicks += 1
+                            state = sprite.id
+                            state_rect = sprite.rect
 
                     if home_img.get_rect().collidepoint(pos):
                         start_screen()
-
-        # write game logic here
 
         # clear the screen before drawing
         game_display.fill(white)

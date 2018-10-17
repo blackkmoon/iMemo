@@ -22,19 +22,19 @@ class Button(object):
 
         # Setting the text:
         self.font = pygame.font.Font("freesansbold.ttf", 20)
-        self.textSurface = self.font.render(text, True, textcolor)
-        self.textRect = self.textSurface.get_rect()
-        self.textRect.center = (400, 310)
-        self.surface.blit(self.textSurface, self.textRect)
+        self.text_surface = self.font.render(text, True, textcolor)
+        self.text_rect = self.text_surface.get_rect()
+        self.text_rect.center = (400, 310)
+        self.surface.blit(self.text_surface, self.text_rect)
         self.draw_text = "yes"
 
     def highlight(self, color, y):
         self.surface.fill((255, 255, 255))
         self.rect = pygame.draw.rect(self.surface, color, (self.x, y, self.width, self.height))
         if self.draw_text == "yes":
-            self.surface.blit(self.textSurface, self.textRect)
+            self.surface.blit(self.text_surface, self.text_rect)
 
     def highlight_text(self):
-        self.textRect.center = (400, 317)
-        self.surface.blit(self.textSurface, self.textRect)
-        self.textRect.center = (400, 310)
+        self.text_rect.center = (400, 317)
+        self.surface.blit(self.text_surface, self.text_rect)
+        self.text_rect.center = (400, 310)
