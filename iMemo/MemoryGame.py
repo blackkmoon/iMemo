@@ -88,7 +88,7 @@ def start_screen():
 
             # Displaying the home button:
             game_display.blit(home_img, (home_x, home_y))
-            message_display("Welcome to iMemo!", ((display_width / 2), (display_height / 3.5)))
+            message_display("Welcome to Memory Game!", ((display_width / 2), (display_height / 3.5)))
 
         pygame.display.update()
         clock.tick(30)
